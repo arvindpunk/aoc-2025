@@ -4,7 +4,7 @@ SELECT
         arrayJoin(
             arrayMap(
                 x -> x * (toInt64(exp10(countDigits(x))) + 1),
-                range(invalid_lt_a, invalid_lte_b + 1)
+                `range`(invalid_lt_a, invalid_lte_b + 1)
             )
         )
     )
@@ -40,3 +40,35 @@ FROM
     );
 
 --part b
+SELECT
+    sumIf(
+        x,
+        arraySum(
+            arrayMap(
+                len -> toInt64(
+                    repeat(
+                        substring(toString(x), 1, len),
+                        intDiv(countDigits(x), len)
+                    )
+                ) = x,
+                `range`(1, 1 + intDiv(countDigits(x), 2))
+            )
+        ) > 0
+    )
+FROM
+    (
+        SELECT
+            arrayJoin(`range`(a, b)) AS x
+        FROM
+            (
+                SELECT
+                    arrayMap(
+                        x -> toInt64(x),
+                        splitByChar('-', arrayJoin(splitByChar(',', line)))
+                    ) AS query,
+                    query [1] AS a,
+                    query [2] AS b
+                FROM
+                    "table"
+            )
+    );
